@@ -1,20 +1,20 @@
 // components/common/AppHeader.tsx
 import React from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet, Platform } from 'react-native';
-import { Ionicons, FontAwesome } from '@expo/vector-icons'; // 使用 Ionicons 作为搜索图标
-import { useSafeAreaInsets } from 'react-native-safe-area-context'; // 处理安全区域
+import { Ionicons, FontAwesome } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 type AppHeaderProps = {
     onMenuPress?: () => void;
-    onSearchPress?: () => void; // 当点击搜索图标时（如果输入框右侧有图标）
+    onSearchPress?: () => void;
     searchPlaceholder?: string;
     searchTerm?: string;
     onSearchTermChange?: (text: string) => void;
     showMenuButton?: boolean;
-    showSearchIcon?: boolean; // 是否在输入框右侧显示搜索图标
+    showSearchIcon?: boolean;
 };
 
 const AppHeader: React.FC<AppHeaderProps> = ({
@@ -30,16 +30,22 @@ const AppHeader: React.FC<AppHeaderProps> = ({
     const colorScheme = useColorScheme() ?? 'light';
     const colors = Colors[colorScheme];
 
+    // Define a base height for the content area of the header
+    // This should be the height of the search bar row itself, e.g., searchInput height + some vertical padding for content
+    const contentRowHeight = Layout.headerHeight > 0 ? Layout.headerHeight : 44; // e.g. 44 or based on searchInput height
+
     return (
         <View style={[
-            styles.container,
+            styles.container, // Basic layout like paddingHorizontal, borderBottomWidth
             {
-                paddingTop: insets.top + Layout.spacing.sm, // 顶部安全区域 + 一些间距
+                paddingTop: insets.top + Layout.spacing.sm, // Add safe area inset and a small margin
+                paddingBottom: Layout.spacing.sm,          // Add some padding at the bottom of the header
                 backgroundColor: colors.cardBg,
                 borderBottomColor: colors.borderColor,
+                // The total height will be determined by paddingTop, content height, and paddingBottom
             }
         ]}>
-            <View style={styles.content}>
+            <View style={[styles.content, { height: contentRowHeight }]}>
                 {showMenuButton && (
                     <TouchableOpacity onPress={onMenuPress} style={styles.iconButton} accessibilityLabel="打开菜单">
                         <FontAwesome name="bars" size={22} color={colors.textLight} />
@@ -57,7 +63,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
                         value={searchTerm}
                         onChangeText={onSearchTermChange}
                         returnKeyType="search"
-                        onSubmitEditing={onSearchPress} // 当键盘上的搜索按钮被按下
+                        onSubmitEditing={onSearchPress}
                     />
                 </View>
                 {showSearchIcon && (
@@ -72,29 +78,35 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 
 const styles = StyleSheet.create({
     container: {
-        height: Layout.headerHeight + (Platform.OS === 'ios' ? 20 : Layout.spacing.sm), // 基础高度 + 顶部间距 (粗略估计)
-        paddingBottom: Layout.spacing.sm,
+        // REMOVED: height: Layout.headerHeight + (Platform.OS === 'ios' ? 20 : Layout.spacing.sm),
+        // paddingBottom is now applied dynamically above for clarity, or could be kept here.
         paddingHorizontal: Layout.spacing.page,
         borderBottomWidth: 1,
     },
     content: {
-        flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
+        // height: Layout.headerHeight, // Or some fixed value like 44, or based on searchInput height
+        // This height is for the row containing icons and search input
+        // This is now set dynamically in the component for clarity
     },
     iconButton: {
         padding: Layout.spacing.sm,
+        justifyContent: 'center', // Ensure icon is vertically centered if content row is taller
+        alignItems: 'center',
     },
     searchBox: {
         flex: 1,
         marginHorizontal: Layout.spacing.sm,
+        justifyContent: 'center', // Vertically center TextInput within searchBox
     },
     searchInput: {
-        height: 38, // 调整高度以匹配视觉
+        height: 44, // This seems like a reasonable fixed height for the input
         paddingHorizontal: Layout.spacing.md,
-        borderRadius: Layout.borderRadius.pill, // 胶囊形状
+        borderRadius: Layout.borderRadius.pill,
         borderWidth: 1,
         fontSize: Layout.fontSize.md,
+        // textAlignVertical: 'center', // Useful on Android if text isn't centered
     },
 });
 

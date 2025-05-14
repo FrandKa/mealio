@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
         bottom: Layout.spacing.sm + 5, // 对应 0.75rem + 额外调整
         left: Layout.spacing.md,   // 对应 1rem
         right: Layout.spacing.md + 50, // 给分页器留出空间
-        backgroundColor: 'rgba(0,0,0,0.3)', // 轻微背景增强可读性
+        backgroundColor: 'rgba(0,0,0,0)', // 轻微背景增强可读性
         paddingVertical: Layout.spacing.xs,
         paddingHorizontal: Layout.spacing.sm,
         borderRadius: Layout.borderRadius.sm,

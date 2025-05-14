@@ -62,17 +62,7 @@ export default function TabLayout() {
                         // HTML 使用 fas fa-shopping-cart
                         <TabBarIcon name="shopping-cart" color={focused ? activeColor : inactiveColor} library="FontAwesome" />
                     ),
-                    // tabBarBadge: 3, // 示例：显示角标，后续可以动态化
-                }}
-            />
-            <Tabs.Screen
-                name="notifications" // 对应 app/(tabs)/notifications.tsx 文件
-                options={{
-                    title: '通知',
-                    tabBarIcon: ({ color, focused }) => (
-                        // HTML 使用 far fa-bell, Ionicons 有 outline 版本
-                        <TabBarIcon name={focused ? "notifications" : "notifications-outline"} color={focused ? activeColor : inactiveColor} library="Ionicons" />
-                    ),
+                    tabBarBadge: 3, // 示例：显示角标，后续可以动态化
                 }}
             />
             <Tabs.Screen

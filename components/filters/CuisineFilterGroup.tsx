@@ -46,7 +46,8 @@ const CuisineFilterGroup: React.FC<CuisineFilterGroupProps> = ({
     return (
         <View style={styles.groupContainer}>
             <View style={styles.titleContainer}>
-                <FontAwesome name="cutlery" size={18} color={colors.primary} /> {/* 'utensils' is alias for 'cutlery' in FA5 Free */}
+                <FontAwesome name="cutlery" size={18} color={colors.primary} />
+                {/*<FontAwesome name="cutlery" size={18} color={colors.primary} /> /!* 'utensils' is alias for 'cutlery' in FA5 Free *!/*/}
                 <ThemedText style={styles.groupTitle}>菜系分类</ThemedText>
             </View>
             <View style={styles.optionsContainer}>

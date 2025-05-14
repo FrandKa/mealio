@@ -2,32 +2,27 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import PriceFilterGroup, { PriceOption } from './PriceFilterGroup';
-import DistanceFilterGroup, { DistanceOption } from './DistanceFilterGroup';
-import CuisineFilterGroup, { CuisineOption } from './CuisineFilterGroup';
+import PriceFilterGroup /*, { PriceOption } // PriceOption 不再需要导出或在此处使用 */ from './PriceFilterGroup';
+import DistanceFilterGroup /*, { DistanceOption } */ from './DistanceFilterGroup';
+import CuisineFilterGroup /*, { CuisineOption } */ from './CuisineFilterGroup';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/ThemedText';
-import Button from '@/components/ui/Button'; // 假设我们有一个自定义 Button, 否则用 TouchableOpacity
+// import Button from '@/components/ui/Button'; // <--- 移除或注释掉，因为我们不用它
 
-// 定义 FilterModal 接受的 props 和传出的 filters 结构
-export type Filters = {
-    priceValue: string; // e.g. "1-50", "custom", ""
-    customMinPrice: string;
-    customMaxPrice: string;
-    distance: string | null; // km
-    cuisine: string;
-};
+// 从 types/index.ts 导入类型
+import { AppliedFilters } from '@/types'; // <--- 改为从 types 导入
 
+// FilterModalProps 现在使用导入的 AppliedFilters
 type FilterModalProps = {
     isVisible: boolean;
     onClose: () => void;
-    onApplyFilters: (filters: Filters) => void;
-    initialFilters: Filters;
-    isLocationAvailable: boolean; // 从父组件传入
-    onMoreCuisinesPress: () => void; // 用于打开更多菜系模态框
+    onApplyFilters: (filters: AppliedFilters) => void; // <--- 使用 AppliedFilters
+    initialFilters: AppliedFilters;                  // <--- 使用 AppliedFilters
+    isLocationAvailable: boolean;
+    onMoreCuisinesPress: () => void;
 };
 
 const FilterModal: React.FC<FilterModalProps> = ({
@@ -43,23 +38,19 @@ const FilterModal: React.FC<FilterModalProps> = ({
     const commonColors = Colors.common;
     const insets = useSafeAreaInsets();
 
-    // 内部状态管理筛选选项，初始化时从 props 获取
-    const [currentFilters, setCurrentFilters] = useState<Filters>(initialFilters);
+    // 内部状态现在也使用 AppliedFilters
+    const [currentFilters, setCurrentFilters] = useState<AppliedFilters>(initialFilters); // <--- 使用 AppliedFilters
 
     useEffect(() => {
-        // 当 initialFilters 变化时 (例如，外部清除了筛选条件)，同步内部状态
         setCurrentFilters(initialFilters);
     }, [initialFilters]);
 
-
     const handleApply = () => {
-        // 可以在这里做一些校验，例如 minPrice <= maxPrice
         let finalFilters = { ...currentFilters };
         if (finalFilters.priceValue === 'custom') {
             const minP = parseFloat(finalFilters.customMinPrice);
             const maxP = parseFloat(finalFilters.customMaxPrice);
             if (!isNaN(minP) && !isNaN(maxP) && minP > maxP) {
-                // 简单交换
                 [finalFilters.customMinPrice, finalFilters.customMaxPrice] = [finalFilters.customMaxPrice, finalFilters.customMinPrice];
             }
         }
@@ -67,11 +58,11 @@ const FilterModal: React.FC<FilterModalProps> = ({
         onClose();
     };
 
-    const updateFilter = (key: keyof Filters, value: any) => {
+    // keyof AppliedFilters 确保了类型安全
+    const updateFilter = (key: keyof AppliedFilters, value: any) => { // <--- 使用 keyof AppliedFilters
         setCurrentFilters(prev => ({ ...prev, [key]: value }));
     };
 
-    // 当预设价格选项被选中时，清空自定义价格输入
     const handlePriceOptionSelect = (value: string) => {
         updateFilter('priceValue', value);
         if (value !== 'custom') {
@@ -80,7 +71,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
         }
     };
 
-
+    // ... (剩余的 return JSX 和 styles 部分保持不变)
     return (
         <Modal
             animationType="slide"
@@ -133,7 +124,6 @@ const FilterModal: React.FC<FilterModalProps> = ({
 
                     {/* Modal Footer */}
                     <View style={[styles.modalFooter, { borderTopColor: colors.borderColor, backgroundColor: colors.cardBg }]}>
-                        {/* <Button title="应用筛选" onPress={handleApply} /> */}
                         <TouchableOpacity
                             style={[styles.applyButton, { backgroundColor: commonColors.primary }]}
                             onPress={handleApply}
@@ -148,6 +138,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
     );
 };
 
+// styles 部分保持不变
 const styles = StyleSheet.create({
     modalOverlay: {
         flex: 1,

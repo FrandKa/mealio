@@ -8,21 +8,9 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import StarRating from './StarRating'; // 我们稍后会创建这个
+import { Restaurant } from '@/types';
 
 // 模拟的餐厅数据类型，后续会从 types/index.ts 导入
-export type Restaurant = {
-    _id: string;
-    '店铺名': string;
-    '图片链接'?: string;
-    '店铺总分'?: number | string; // API 返回可能是字符串
-    '店铺均分'?: number | string; // API 返回可能是字符串
-    '标签1'?: string; // Category
-    '人均价格'?: number | string;
-    distance_km?: number | string;
-    '推荐菜'?: string[];
-    '详情链接'?: string;
-    // ... 其他可能的字段
-};
 
 type RestaurantListItemProps = {
     restaurant: Restaurant;
