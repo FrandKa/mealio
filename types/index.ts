@@ -17,7 +17,7 @@ export type Restaurant = {
     distance_km?: number | string;
     '推荐菜'?: string[];
     '详情链接'?: string;
-    isFavorite?: boolean; // 可以添加收藏状态
+    is_favorites?: boolean; // 可以添加收藏状态
 
     // Fields often present in detail view
     '店铺地址'?: string;

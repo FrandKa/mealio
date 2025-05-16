@@ -55,14 +55,16 @@
           "locationAlwaysAndWhenInUsePermission": "我们需要您的位置来显示附近的餐厅和按距离筛选（包括应用在后台时，如果您启用了相关功能）。",
           "locationWhenInUsePermission": "我们需要您的位置来显示附近的餐厅和按距离筛选。"
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
     },
     "extra": {
+      "router": {},
       "eas": {
-        "projectId": "YOUR_EAS_PROJECT_ID"
+        "projectId": "6cd392eb-e289-42bd-9674-8ad1b581c360"
       }
     }
   }

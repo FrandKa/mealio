@@ -3,7 +3,10 @@ import React from 'react';
 import { Tabs } from 'expo-router';
 import { FontAwesome, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons'; // 引入图标库
 import Colors from '@/constants/Colors'; // 引入我们定义的颜色
-import { useColorScheme } from '@/hooks/useColorScheme'; // 您项目已有的 hook
+import { useColorScheme } from '@/hooks/useColorScheme';
+import {Platform} from "react-native";
+import {profile} from "@expo/fingerprint/build/utils/Profile";
+import {useAuth} from "@/constants/AuthContext"; // 您项目已有的 hook
 
 // 一个简单的 TabBarIcon 组件
 function TabBarIcon(props: {
@@ -22,6 +25,7 @@ export default function TabLayout() {
     const colorScheme = useColorScheme() ?? 'light'; // 处理 null 的情况
     const activeColor = Colors[colorScheme].tabIconSelected;
     const inactiveColor = Colors[colorScheme].tabIconDefault;
+    const { cartItemCount } = useAuth();
 
     return (
         <Tabs
@@ -44,16 +48,30 @@ export default function TabLayout() {
                     ),
                 }}
             />
-            <Tabs.Screen
-                name="explore" // 对应 app/(tabs)/explore.tsx 文件
-                options={{
-                    title: '发现',
-                    tabBarIcon: ({ color, focused }) => (
-                        // HTML 使用 far fa-compass (FontAwesome Pro), FontAwesome 免费版是 fas fa-compass
-                        <TabBarIcon name="compass" color={focused ? activeColor : inactiveColor} library="FontAwesome" />
-                    ),
-                }}
-            />
+            {/* 根据平台条件渲染 '发现' Tab */}
+            {Platform.OS === 'web' ? (
+                <Tabs.Screen
+                    name="explore" // Web 平台，"发现" Tab 指向 profile 页面
+                    options={{
+                        title: '发现 (Web)', // 或者你可以保持叫 '发现'，但内容是 profile
+                        tabBarIcon: ({ color, focused }) => (
+                            // 可以使用不同的图标，或者保持 'compass' 图标但指向 profile
+                            <TabBarIcon name="user" color={focused ? activeColor : inactiveColor} library="FontAwesome" />
+                        ),
+                        // href: '/profile', // 如果 name 与文件名不匹配，可能需要 href (但这里 name="profile" 应该能找到 app/(tabs)/profile.tsx)
+                    }}
+                />
+            ) : (
+                <Tabs.Screen
+                    name="explore" // 其他平台 (iOS, Android)，"发现" Tab 指向 explore 页面
+                    options={{
+                        title: '发现',
+                        tabBarIcon: ({ color, focused }) => (
+                            <TabBarIcon name="compass" color={focused ? activeColor : inactiveColor} library="FontAwesome" />
+                        ),
+                    }}
+                />
+            )}
             <Tabs.Screen
                 name="list" // 对应 app/(tabs)/list.tsx 文件
                 options={{
@@ -62,11 +80,11 @@ export default function TabLayout() {
                         // HTML 使用 fas fa-shopping-cart
                         <TabBarIcon name="shopping-cart" color={focused ? activeColor : inactiveColor} library="FontAwesome" />
                     ),
-                    tabBarBadge: 3, // 示例：显示角标，后续可以动态化
+                    tabBarBadge: cartItemCount, // 示例：显示角标，后续可以动态化
                 }}
             />
             <Tabs.Screen
-                name="profile" // 对应 app/(tabs)/profile.tsx 文件
+                name='profile' // 对应 app/(tabs)/profile.tsx 文件
                 options={{
                     title: '我的',
                     tabBarIcon: ({ color, focused }) => (

@@ -10,30 +10,40 @@ export default {
         height: screenHeight,
     },
     spacing: {
-        xs: 4,  // Extra small
-        sm: 8,  // Small
-        md: 16, // Medium (e.g., padding for sections, cards)
-        lg: 24, // Large
-        xl: 32, // Extra large
-        page: 16, // Default horizontal padding for pages (based on CSS 1rem for padding)
+        xxs: 4,
+        xs: 8,  // Changed from 4 to 8 for more distinct spacing steps
+        sm: 12, // Changed from 8 to 12
+        md: 16,
+        lg: 24,
+        xl: 32,
+        xxl: 48,
+        page: 16, // Default horizontal padding for pages
     },
     borderRadius: {
-        sm: 4,  // --radius-sm
-        md: 8,  // --radius-md
-        lg: 16, // --radius-lg
+        sm: 4,
+        md: 8,
+        lg: 16, // Good for larger cards or main buttons
+        xl: 24, // Added for very rounded elements like some modals
         pill: 50, // For pill-shaped buttons/chips
-        circle: screenWidth / 2, // For perfect circles (if needed)
+        circle: screenWidth / 2, // For perfect circles
+        full: 999, // For ensuring small elements are circular
     },
-    headerHeight: 56, // --header-height
-    bottomNavHeight: 60, // --bottom-nav-height
+    headerHeight: 56,
+    bottomNavHeight: 60,
     fontSize: {
-        xs: 10, // 0.6rem - 0.7rem
-        sm: 12, // 0.75rem - 0.85rem
-        md: 14, // 0.875rem - 0.9rem
-        lg: 16, // 1rem
-        xl: 18, // 1.1rem - 1.2rem
-        title: 20, // ~1.3rem for section titles
-        header: 24, // Larger titles
+        xs: 10,
+        sm: 12,
+        md: 14, // Standard body text
+        lg: 16, // Slightly larger body text or subtitles
+        xl: 18, // Larger subtitles or small titles
+        // title: 20, // Defined below as titleS, titleM, titleL for more granularity
+        header: 24, // For main screen titles
+        display: 36, // For very large display text like "Welcome to Ktr"
+
+        // More granular title sizes
+        titleS: 20, // Small title
+        titleM: 24, // Medium title (replaces 'header' for clarity)
+        titleL: 28, // Large title
     },
     fontWeight: {
         light: '300' as '300',
@@ -41,32 +51,33 @@ export default {
         medium: '500' as '500',
         semibold: '600' as '600',
         bold: '700' as '700',
+        extrabold: '800' as '800', // Added
+        black: '900' as '900',     // Added
     },
-    // 可以添加其他从 CSS 中提取的布局常量，例如阴影
-    // React Native 的阴影与 CSS 不同，通常使用 shadowColor, shadowOffset, shadowOpacity, shadowRadius (iOS) 和 elevation (Android)
     shadow: {
-        sm: { // --shadow-sm
+        sm: {
             shadowColor: '#000',
             shadowOffset: { width: 0, height: 1 },
             shadowOpacity: 0.05,
             shadowRadius: 2,
-            elevation: 2, // Android
+            elevation: 2,
         },
-        md: { // --shadow-md
+        md: {
             shadowColor: '#000',
             shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.1, // Roughly (0.1 + 0.06)/2
-            shadowRadius: 6, // Roughly (6 + 4)/2
-            elevation: 5, // Android
+            shadowOpacity: 0.1,
+            shadowRadius: 6,
+            elevation: 5,
         },
-        lg: { // --shadow-lg
+        lg: {
             shadowColor: '#000',
             shadowOffset: { width: 0, height: 10 },
             shadowOpacity: 0.1,
             shadowRadius: 15,
-            elevation: 8, // Android
+            elevation: 8,
         }
     },
-    inputHeight: 44, // 常见输入框高度
-    buttonHeight: 48, // 常见按钮高度
+    inputHeight: 48, // Slightly increased for better touch target
+    buttonHeight: 50, // Slightly increased
+    OTP_LENGTH: 4,
 };
