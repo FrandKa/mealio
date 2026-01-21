@@ -129,9 +129,7 @@ export default function HomeScreen() {
             return false;
         }
         try {
-            console.log(5)
             let currentLocation = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced, timeout: 5000 });
-            console.log(6)
             setLocation(currentLocation);
             setIsLocationAvailable(true);
             setLocationErrorMsg(null);
@@ -191,11 +189,9 @@ export default function HomeScreen() {
             setCurrentPage(data.page);
             if (actionType === 'initial') setInitialLoadDone(true);
         } catch (error: any) {
-            console.error("加载餐厅列表失败:", error);
+            console.error("加载餐厅列表失败:", error.status);
             Alert.alert("错误", `加载餐厅列表失败: ${error.message}`);
-            if (error.status === 401) {
-                await signOut()
-            }
+            await signOut()
         } finally {
             switch (actionType) {
                 case 'loadMore': setIsLoadingMore(false); break;
@@ -246,13 +242,14 @@ export default function HomeScreen() {
                 loadRestaurants(1, appliedFilters, 'initial');
             }
         } else {
+            console.log("filter change")
             if (!isFiltersInitialComparedToState) {
                 if (!isLoading && !isLoadingMore && !isRefreshing) {
                     loadRestaurants(1, appliedFilters, 'filterChange');
                 }
             }
         }
-    }, [appliedFilters, location, isLocationAvailable, initialLoadDone, loadRestaurants, isLoading, isLoadingMore, isRefreshing]);
+    }, [appliedFilters, location, isLocationAvailable, initialLoadDone, loadRestaurants, session, useAuth().isLoading]);
 
 
     const handleSearchPress = () => {
@@ -271,22 +268,24 @@ export default function HomeScreen() {
 
     const handleRefresh = () => {
         if (!isRefreshing) {
-            setCurrentPage(1);
-            setInitialLoadDone(false);
-            // 刷新时，也应该重新加载特色餐厅 (如果它们是动态的)
-            if (ITEMS_PER_PAGE_FEATURED > 0) {
+            console.log("User triggered refresh.");
+            setCurrentPage(1); // 重置页码
+            // setInitialLoadDone(false); // 标记需要重新进行“初始”加载（或刷新加载）
+            loadRestaurants(1, appliedFilters, 'refresh'); // 调用刷新
+
+            // 刷新特色餐厅
+            if (ITEMS_PER_PAGE_FEATURED > 0 && session) {
                 const loadFeatured = async () => {
                     setIsLoadingFeatured(true);
                     try {
                         const params: RestaurantApiParams = { page: 1, per_page: ITEMS_PER_PAGE_FEATURED };
-                        const data = await fetchRestaurantsAPI(params);
-                        setFeaturedRestaurants(data.restaurants);
+                        const data = await fetchRestaurantsAPI(params, session);
+                        setFeaturedRestaurants(data.restaurants.map(r => ({...r, is_favorites: !!r.is_favorites })));
                     } catch (error) { console.error("刷新特色餐厅失败:", error); }
                     finally { setIsLoadingFeatured(false); }
                 };
                 loadFeatured();
             }
-            loadRestaurants(1, appliedFilters, 'refresh');
         }
     };
 
@@ -379,7 +378,7 @@ export default function HomeScreen() {
             <FlatList
                 data={restaurants}
                 renderItem={renderRestaurantItem}
-                keyExtractor={(item) => item._id + random(100000).toString()}
+                keyExtractor={(item) => item._id}
                 ListHeaderComponent={(
                     <>
                         <BannerSlider />

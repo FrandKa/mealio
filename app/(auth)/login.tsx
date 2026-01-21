@@ -119,6 +119,7 @@ export default function LoginScreen() {
                                 secureTextEntry={!showPassword}
                                 returnKeyType="done"
                                 onSubmitEditing={handleLogin}
+                                // textAlignVertical="top" // Android上使文字从顶部开始
                             />
                             <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIconContainer}>
                                 <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={24} color={themedColors.icon} />

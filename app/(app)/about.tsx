@@ -1,14 +1,14 @@
 // app/(app)/settings/about.tsx
-import React from 'react';
-import { View, StyleSheet, Text, Image, ScrollView, Dimensions, Platform } from 'react-native';
-import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import Animated, { SlideInDown, FadeInUp, ZoomIn, Easing } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient'; // 用于背景渐变
 import Constants from 'expo-constants'; // 用于状态栏高度
+import { LinearGradient } from 'expo-linear-gradient'; // 用于背景渐变
+import React from 'react';
+import { Dimensions, Image, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Animated, { Easing, FadeInUp, ZoomIn } from 'react-native-reanimated';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -25,17 +25,7 @@ export default function AboutScreen() {
     return (
         <ThemedView style={styles.outerContainer}>
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContentContainer}>
-                {/* 顶部 Mealio 艺术字 Logo */}
-                {/*<Animated.View*/}
-                {/*    entering={SlideInDown.delay(200).duration(1000).springify().damping(15).stiffness(100)}*/}
-                {/*    style={styles.topLogoContainer}*/}
-                {/*>*/}
-                {/*    <Text style={[styles.topLogoText, { color: themedColors.primary }]}>Mealio</Text>*/}
-                {/*</Animated.View>*/}
-
-                {/* 主要内容区域 */}
                 <View style={styles.mainContent}>
-                    {/* 背景形状和圆形图片 */}
                     <View style={styles.heroBackgroundContainer}>
                         <LinearGradient
                             colors={backgroundGradientColors}
@@ -48,7 +38,7 @@ export default function AboutScreen() {
                             entering={ZoomIn.delay(400).duration(800).easing(Easing.out(Easing.exp))}
                         >
                             <Image
-                                source={require('@/assets/images/logo.png')} // 确保路径正确
+                                source={require('@/assets/images/logo.png')}
                                 style={styles.logoImage}
                             />
                         </Animated.View>
@@ -60,7 +50,7 @@ export default function AboutScreen() {
                             Mealio
                         </ThemedText>
                         <ThemedText type="defaultSemiBold" style={styles.taglineText}>
-                            FrandKa & Sherl & 王慧君 & 朱子芙 出品
+                            FrandKa 出品
                         </ThemedText>
                         <View style={styles.statsContainer}>
                             <ThemedText style={styles.statText}>中国 南京</ThemedText>
@@ -143,19 +133,11 @@ const styles = StyleSheet.create({
         bottom: -(screenWidth * 0.4) / 2,
         ...Layout.shadow.lg,
         elevation: 10,
-        // overflow: 'hidden', // 有时在 Image 上设置 borderRadius 后，容器的 overflow:hidden 不是必需的，但保留也无妨
     },
     logoImage: {
         width: '100%', // 图片宽度与容器相同
         height: '100%', // 图片高度与容器相同
         borderRadius: (screenWidth * 0.4) / 2, // <--- 关键：在 Image 上应用 borderRadius
-        // 这个值应该与 logoImageContainer 的 borderRadius 相同，
-        // 或者等于 Image 自身宽高的一半。
-        // resizeMode: 'cover', // 'cover' 会确保图片填满容器，可能会裁剪图片的某些部分以保持宽高比。
-        // 如果你的 logo.png 主体内容已经是近乎正方形的，'cover' 或 'contain' 可能效果都不错。
-        // 如果 logo.png 不是正方形，'cover' 会裁剪，'contain' 会在某个方向留白。
-        // 你需要根据你的 logo.png 图片内容选择最佳的 resizeMode。
-        // 如果你希望图片被拉伸以填满圆形（不保持宽高比），可以使用 'stretch'，但不推荐。
     },
     textInfoContainer: {
         alignItems: 'center',

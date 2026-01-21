@@ -58,12 +58,11 @@ export default {
     icon: textLight,
     tabIconDefault: textLight,
     tabIconSelected: primary,
-// 新增的颜色
     primary: primary,
     primaryLight: primaryLight,
     primaryDark: primaryDark,
     secondary: secondary,
-    textLight: textLight, // This is what we'll use for textSubtle
+    textLight: textLight,
 
     // --- 添加 Auth 相关的颜色键 ---
     authBackground: authScreenBackground,

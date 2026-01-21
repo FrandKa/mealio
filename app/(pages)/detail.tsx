@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
     },
     bannerImage: {
         width: '100%',
-        height: 250,
+        height: Platform.OS === 'web' ? 450 : 250,
         backgroundColor: Colors.common.placeholderBg,
     },
     contentPadding: {

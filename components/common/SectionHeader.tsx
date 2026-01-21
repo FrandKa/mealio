@@ -45,7 +45,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
                     <FontAwesome
                         name="sliders" // fas fa-sliders-h 在免费版 FontAwesome 中是 'sliders'
                         size={16} // 调整大小以匹配视觉
-                        color={colors.textLight}
+                        color={colors.textSubtle}
                         style={styles.filterIcon}
                     />
                 </TouchableOpacity>

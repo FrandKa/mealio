@@ -77,7 +77,6 @@ const createAuthHeaders = async (existingHeaders?: HeadersInit): Promise<Headers
     const headers = new Headers(existingHeaders || {});
     const token = await getAuthToken();
     if (token) {
-        console.log("token", token)
         headers.append('Authorization', `Bearer ${token}`);
     }
     if (!headers.has('Content-Type') && !(existingHeaders && (existingHeaders instanceof FormData))) { // FormData 会自动设置 Content-Type
@@ -134,8 +133,8 @@ export const fetchCuisinesAPI = async (
     }
     const url = `${API_BASE_URL}${API_ENDPOINTS.RESTAURANT_SUBTITLES}?${queryParams.toString()}`;
     console.log('Requesting Cuisines:', url);
-    // const headers = await createAuthHeaders(); // 如果需要认证
-    const response = await fetch(url); // 如果不需要认证
+    const headers = await createAuthHeaders(); // 如果需要认证
+    const response = await fetch(url, { headers }); // 如果不需要认证
     return handleApiResponse(response);
 };
 
@@ -223,4 +222,14 @@ export const clearCartAPI = async (): Promise<CartActionResponse | null> => { //
         // DELETE 请求通常不带 body，如果后端需要，则添加
     });
     return handleApiResponse(response); // handleApiResponse 会处理 204
+};
+
+export const fetchRandomRestaurantAPI = async (): Promise<Restaurant> => {
+    // 如果后端 /restaurants/random 接口确实是推荐购物车的，那很好
+    // 如果是全局随机推荐，那也一样。确保端点和行为与后端一致。
+    const url = `${API_BASE_URL}${API_ENDPOINTS.CART_RANDOM}`; // 使用你在 Api.ts 中定义的 CART_RANDOM
+    console.log('Fetching random restaurant:', url);
+    const headers = await createAuthHeaders(); // 这个接口需要 token
+    const response = await fetch(url, { headers });
+    return handleApiResponse(response); // 假设返回单个 Restaurant 对象
 };

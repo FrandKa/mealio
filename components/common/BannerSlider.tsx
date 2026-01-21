@@ -1,6 +1,6 @@
 // components/common/BannerSlider.tsx
 import React from 'react';
-import { View, Image, Text, StyleSheet, Dimensions } from 'react-native';
+import {View, Image, Text, StyleSheet, Dimensions, Platform} from 'react-native';
 import Swiper from 'react-native-swiper'; // 导入 Swiper
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
@@ -37,7 +37,7 @@ type BannerSliderProps = {
 };
 
 const { width: screenWidth } = Dimensions.get('window');
-const bannerHeight = 160; // 与 CSS 中的 height 一致
+const bannerHeight = Platform.OS === 'web' ? 400 : 160; // 与 CSS 中的 height 一致
 
 const BannerSlider: React.FC<BannerSliderProps> = ({ banners = mockBanners }) => {
     const colorScheme = useColorScheme() ?? 'light';

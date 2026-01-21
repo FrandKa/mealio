@@ -1,5 +1,16 @@
 // types/index.ts
 
+// 这是 LocationCoords 的定义
+export interface LocationCoords {
+    latitude: number;
+    longitude: number;
+    accuracy?: number | null; // 定位精度(米)
+    altitude?: number | null; // 海拔高度(米)
+    altitudeAccuracy?: number | null; // 海拔精度(米)
+    heading?: number | null;    // 设备方向 (0-360度, 0为正北)
+    speed?: number | null;      // 设备速度 (米/秒)
+}
+
 // From RestaurantListItem.tsx 移动过来的 Restaurant 类型
 export type Restaurant = {
     _id: string;

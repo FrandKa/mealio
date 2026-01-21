@@ -1,4 +1,5 @@
 // app/_layout.tsx
+import 'setimmediate'; // 确保在其他代码之前导入
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import React, {useContext, useEffect} from 'react';
 import { Slot, SplashScreen, useRouter, useSegments, Stack } from 'expo-router';

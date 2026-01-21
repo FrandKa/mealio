@@ -166,7 +166,6 @@ export default function HelpScreen() {
                                         numberOfLines={6}
                                         value={feedbackText}
                                         onChangeText={setFeedbackText}
-                                        textAlignVertical="top" // Android上使文字从顶部开始
                                     />
                                     <TouchableOpacity onPress={handleSubmitFeedback} style={styles.submitFeedbackButtonWrapper}>
                                         <LinearGradient
@@ -200,7 +199,7 @@ const styles = StyleSheet.create({
     headerSection: {
         alignItems: 'center',
         marginBottom: Layout.spacing.xl,
-        paddingTop: Platform.OS === 'ios' ? Layout.spacing.md + 40 : Layout.spacing.md,
+        paddingTop: Platform.OS === 'ios' ? Layout.spacing.md + 40 : Layout.spacing.md + 50,
     },
     pageTitle: {
         textAlign: 'center',

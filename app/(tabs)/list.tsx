@@ -11,6 +11,9 @@ import {
     RefreshControl,
     Platform,
     Dimensions, // 确保 Dimensions 已导入
+    ImageBackground, // 新增：用于卡片背景
+    Modal,           // 新增：用于浮现卡片
+    Linking, TouchableWithoutFeedback,         // 新增：用于打开详情链接
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router'; // 导入 useFocusEffect
 import { ThemedView } from '@/components/ThemedView';
@@ -18,17 +21,98 @@ import { ThemedText } from '@/components/ThemedText';
 import RestaurantListItem from '@/components/common/RestaurantListItem'; // 确保路径正确
 import Layout from '@/constants/Layout';
 import { Restaurant } from '@/types'; // 移除了未使用的 RestaurantApiParams
-import { fetchCartAPI, removeFromCartAPI, clearCartAPI, fetchRestaurantsAPI } from '@/services/apiService'; // 导入购物车API
+import {
+    fetchCartAPI,
+    removeFromCartAPI,
+    clearCartAPI,
+    fetchRandomRestaurantAPI // <--- 导入新的API函数
+} from '@/services/apiService';
 import { useAuth } from '@/constants/AuthContext'; // 导入 AuthContext
 import Colors from "@/constants/Colors";
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
+import {FontAwesome, Ionicons, MaterialCommunityIcons} from '@expo/vector-icons';
+import Animated, {FadeInUp, FadeInDown, ZoomIn, Easing} from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 
-const { height: screenHeight } = Dimensions.get('window');
 const ITEMS_PER_PAGE = 10;
 
+// --- 随机推荐卡片组件 ---
+interface RandomPickCardProps {
+    restaurant: Restaurant;
+    visible: boolean;
+    onClose: () => void;
+    onGoToDetail: (url: string) => void;
+    colors: typeof Colors.light; // themedColors
+}
+
+const RandomPickCard: React.FC<RandomPickCardProps> = ({ restaurant, visible, onClose, onGoToDetail, colors }) => {
+    if (!visible || !restaurant) return null;
+
+    const handleDetailLink = () => {
+        if (restaurant['详情链接']) {
+            Linking.openURL(restaurant['详情链接']).catch(err =>
+                Alert.alert("错误", "无法打开链接。")
+            );
+        } else {
+            Alert.alert("提示", "此餐厅没有提供详情链接。");
+        }
+        onClose(); // 打开链接后也关闭卡片
+    };
+
+
+    return (
+        <Modal
+            animationType="fade" // 卡片浮现动画
+            transparent={true}
+            visible={visible}
+            onRequestClose={onClose}
+        >
+            <TouchableWithoutFeedback onPress={onClose}>
+                <View style={randomCardStyles.modalOverlay}>
+                    <Animated.View entering={ZoomIn.duration(400).easing(Easing.out(Easing.exp))}>
+                        <TouchableWithoutFeedback onPress={() => { /* 防止点击卡片内部关闭 */ }}>
+                            <ImageBackground
+                                source={{ uri: restaurant['图片链接'] || 'https://via.placeholder.com/300x400/E5E7EB/B0B0B0?text=No+Image' }}
+                                style={[randomCardStyles.cardContainer]}
+                                imageStyle={randomCardStyles.cardBackgroundImage} // 应用 borderRadius 到图片本身
+                                resizeMode="cover"
+                            >
+                                <LinearGradient
+                                    colors={['transparent', 'rgba(0,0,0,0.1)', 'rgba(0,0,0,0.8)']} // 底部渐变以突出文字
+                                    style={randomCardStyles.gradientOverlay}
+                                />
+                                <View style={randomCardStyles.cardHeader}>
+                                    <TouchableOpacity onPress={onClose} style={randomCardStyles.iconButton}>
+                                        <Ionicons name="arrow-back" size={28} color={Colors.common.white} />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={handleDetailLink} style={randomCardStyles.iconButton}>
+                                        <FontAwesome name="bookmark-o" size={26} color={Colors.common.white} />
+                                        {/* 如果想用你的 is_favorites 状态，需要传递并处理 */}
+                                        {/* <AntDesign name={restaurant.is_favorites ? "bookmark" : "bookmark-o"} size={26} color={Colors.common.white} /> */}
+                                    </TouchableOpacity>
+                                </View>
+                                <View style={randomCardStyles.cardFooter}>
+                                    <Text style={randomCardStyles.restaurantName}>{restaurant['店铺名']}</Text>
+                                    <View style={randomCardStyles.infoRow}>
+                                        <Ionicons name="location-sharp" size={16} color={Colors.common.white} style={randomCardStyles.infoIconFooter} />
+                                        <Text style={randomCardStyles.infoTextFooter} numberOfLines={1}>{restaurant['店铺地址'] || '未知位置'}</Text>
+                                    </View>
+                                    <View style={randomCardStyles.priceRow}>
+                                        <Text style={randomCardStyles.priceLabel}>价格</Text>
+                                        <Text style={randomCardStyles.priceValue}>
+                                            {restaurant['人均价格'] ? `¥${restaurant['人均价格']}` : '暂无'}
+                                        </Text>
+                                    </View>
+                                </View>
+                            </ImageBackground>
+                        </TouchableWithoutFeedback>
+                    </Animated.View>
+                </View>
+            </TouchableWithoutFeedback>
+        </Modal>
+    );
+};
+// --- 结束随机推荐卡片组件 ---
 export default function CartScreen() {
     const router = useRouter();
     const colorScheme = useColorScheme() ?? 'light';
@@ -42,6 +126,12 @@ export default function CartScreen() {
     const [isLoadingMore, setIsLoadingMore] = useState(false); // 用于上拉加载更多
     const [isRefreshing, setIsRefreshing] = useState(false); // 由 RefreshControl 控制
     const [error, setError] = useState<string | null>(null);
+
+    // --- State for Random Pick Card ---
+    const [randomPickVisible, setRandomPickVisible] = useState(false);
+    const [randomRestaurantData, setRandomRestaurantData] = useState<Restaurant | null>(null);
+    const [isLoadingRandom, setIsLoadingRandom] = useState(false); // 加载随机餐厅的 loading 状态
+    // --- End State for Random Pick Card ---
 
     // loadCartItems 现在不依赖于它自己设置的 loading states
     const loadCartItems = useCallback(async (page: number, isRefreshOperation = false) => {
@@ -166,33 +256,31 @@ export default function CartScreen() {
         router.push({ pathname: '/detail', params: { id } });
     };
 
+    // --- 修改 handlePickRandomRestaurant ---
     const handlePickRandomRestaurant = async () => {
         if (!user || !session) {
             Alert.alert("提示", "请先登录以使用此功能。");
             return;
         }
-        const currentLoadingState = isLoading || isLoadingMore || isRefreshing;
-        if (currentLoadingState) return; // 如果正在加载，则不执行
+        if (isLoadingRandom) return; // 如果正在加载，则不执行
 
-        setIsLoading(true); // 使用主 isLoading 来表示正在“挑选”
+        setIsLoadingRandom(true);
         try {
-            const data = await fetchRestaurantsAPI({ page: 1, per_page: 20 });
-            if (data.restaurants && data.restaurants.length > 0) {
-                const randomIndex = Math.floor(Math.random() * data.restaurants.length);
-                const randomRestaurant = data.restaurants[randomIndex];
-                Alert.alert("为你推荐", `试试这家餐厅：${randomRestaurant['店铺名']}？`, [
-                    {text: "不了，谢谢"},
-                    {text: "查看详情", onPress: () => handleRestaurantPress(randomRestaurant._id)}
-                ]);
+            const data = await fetchRandomRestaurantAPI(); // 调用新的API
+            if (data) {
+                setRandomRestaurantData(data);
+                setRandomPickVisible(true); // 显示卡片
             } else {
                 Alert.alert("抱歉", "暂时没有可推荐的餐厅。");
             }
         } catch (error: any) {
+            console.error("获取随机餐厅失败:", error);
             Alert.alert("出错了", error.message || "获取推荐餐厅失败。");
         } finally {
-            setIsLoading(false);
+            setIsLoadingRandom(false);
         }
     };
+    // --- 结束修改 ---
 
 
     const renderHeader = () => (
@@ -270,16 +358,38 @@ export default function CartScreen() {
                 showsVerticalScrollIndicator={false}
             />
 
+            {/* 随机推荐按钮 */}
             <Animated.View entering={FadeInUp.delay(800)} style={[styles.randomPickButtonContainer, { bottom: (Layout.bottomNavHeight || 60) + Layout.spacing.md }]}>
                 <TouchableOpacity
                     style={[styles.randomPickButton, { backgroundColor: themedColors.tint }]}
                     onPress={handlePickRandomRestaurant}
-                    disabled={isLoading || isLoadingMore || isRefreshing}
+                    disabled={isLoading || isLoadingMore || isRefreshing || isLoadingRandom} // 添加 isLoadingRandom
                 >
-                    <MaterialCommunityIcons name="silverware-fork-knife" size={20} color={Colors.common.white} style={{marginRight: Layout.spacing.sm}}/>
-                    <Text style={[styles.randomPickButtonText, { color: Colors.common.white }]}>随机来一份</Text>
+                    {isLoadingRandom ? (
+                        <ActivityIndicator color={Colors.common.white} size="small" />
+                    ) : (
+                        <>
+                            <MaterialCommunityIcons name="silverware-fork-knife" size={20} color={Colors.common.white} style={{marginRight: Layout.spacing.sm}}/>
+                            <Text style={[styles.randomPickButtonText, { color: Colors.common.white }]}>随机来一份</Text>
+                        </>
+                    )}
                 </TouchableOpacity>
             </Animated.View>
+
+            {/* 渲染随机推荐卡片 Modal */}
+            {randomRestaurantData && (
+                <RandomPickCard
+                    restaurant={randomRestaurantData}
+                    visible={randomPickVisible}
+                    onClose={() => { setRandomPickVisible(false); setRandomRestaurantData(null); }}
+                    onGoToDetail={(url) => {
+                        Linking.openURL(url).catch(err => Alert.alert("错误", "无法打开链接。"));
+                        setRandomPickVisible(false);
+                        setRandomRestaurantData(null);
+                    }}
+                    colors={themedColors}
+                />
+            )}
         </ThemedView>
     );
 }
@@ -326,7 +436,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         padding: Layout.spacing.xl,
-        minHeight: screenHeight / 2,
+        minHeight: Layout.screen.height / 2,
     },
     browseButton: {
         marginTop: Layout.spacing.lg,
@@ -377,5 +487,87 @@ const styles = StyleSheet.create({
     randomPickButtonText: {
         fontSize: Layout.fontSize.lg,
         fontWeight: Layout.fontWeight.semibold,
+    },
+});
+
+// --- 随机推荐卡片的样式 ---
+const randomCardStyles = StyleSheet.create({
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.6)', // 半透明背景
+    },
+    cardContainer: {
+        width: Platform.OS !== 'web' ? Layout.screen.width * 0.85 : Layout.screen.width * 0.4, // 卡片宽度
+        height: Layout.screen.height * 0.4, // 卡片高度，可根据内容调整
+        borderRadius: Layout.borderRadius.xl, // 大圆角
+        overflow: 'hidden', // 确保背景图和渐变层被裁剪
+        justifyContent: 'space-between', // 使头部在顶部，底部信息在底部
+        position: 'relative',
+        ...Layout.shadow.lg, // 添加阴影
+        elevation: 12,
+    },
+    cardBackgroundImage: {
+        borderRadius: Layout.borderRadius.xl, // 使图片本身也应用圆角
+    },
+    gradientOverlay: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: '60%', // 渐变层高度
+        borderRadius: Layout.borderRadius.xl, // 确保渐变层底部也是圆角
+    },
+    cardHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        padding: Layout.spacing.md,
+        zIndex: 1, // 确保在渐变层之上
+    },
+    iconButton: {
+        padding: Layout.spacing.xs,
+        backgroundColor: 'rgba(0,0,0,0.3)', // 图标按钮背景
+        borderRadius: Layout.borderRadius.circle,
+    },
+    cardFooter: {
+        padding: Layout.spacing.lg,
+        zIndex: 1,
+    },
+    restaurantName: {
+        color: Colors.common.white,
+        fontSize: Layout.fontSize.titleM + 2,
+        fontWeight: Layout.fontWeight.bold,
+        marginBottom: Layout.spacing.xs,
+        textShadowColor: 'rgba(0, 0, 0, 0.75)',
+        textShadowOffset: { width: 1, height: 1 },
+        textShadowRadius: 2,
+    },
+    infoRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: Layout.spacing.sm,
+    },
+    infoIconFooter: {
+        marginRight: Layout.spacing.sm,
+    },
+    infoTextFooter: {
+        color: 'rgba(255,255,255,0.9)',
+        fontSize: Layout.fontSize.md,
+        flexShrink: 1, // 允许文本换行
+    },
+    priceRow: {
+        alignItems: 'flex-end', // 价格通常在右侧
+        marginTop: Layout.spacing.sm,
+    },
+    priceLabel: {
+        color: 'rgba(255,255,255,0.7)',
+        fontSize: Layout.fontSize.sm,
+        marginBottom: Layout.spacing.xxs,
+    },
+    priceValue: {
+        color: Colors.common.white,
+        fontSize: Layout.fontSize.titleL,
+        fontWeight: Layout.fontWeight.bold,
     },
 });

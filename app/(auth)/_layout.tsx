@@ -18,6 +18,7 @@ export default function AuthLayout() {
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={{ flex: 1 }}
                 keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0} // Adjust if needed
+                enabled={false}
             >
                 <Stack
                     screenOptions={{

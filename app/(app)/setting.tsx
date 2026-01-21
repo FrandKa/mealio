@@ -1,31 +1,33 @@
 // app/(app)/settings/edit-profile.tsx
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-    View,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    Image,
-    TextInput,
-    ScrollView,
-    ActivityIndicator,
-    Alert,
-    Platform,
-    Modal, Keyboard, TouchableWithoutFeedback, // 用于头像预览和性别选择
-} from 'react-native';
-import { useRouter } from 'expo-router';
-import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
+import { API_BASE_URL, API_ENDPOINTS } from '@/constants/Api';
+import { useAuth, UserProfile } from '@/constants/AuthContext'; // 导入 UserProfile 类型
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useAuth, UserProfile } from '@/constants/AuthContext'; // 导入 UserProfile 类型
-import { API_BASE_URL, API_ENDPOINTS } from '@/constants/Api';
+import Constants from 'expo-constants'; // 用于状态栏高度
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
-import Constants from 'expo-constants'; // 用于状态栏高度
-import Animated, {FadeInUp, ZoomIn, Easing, SlideInDown} from 'react-native-reanimated';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import {
+    ActivityIndicator,
+    Alert,
+    Image,
+    Keyboard,
+    Modal,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View,
+} from 'react-native';
+import Animated, { FadeInUp, SlideInDown, ZoomIn } from 'react-native-reanimated';
 
 // 扩展 UserProfile 以包含本地编辑状态
 interface EditableUserProfile extends Partial<UserProfile> {
